@@ -1,143 +1,149 @@
-# Curriculum App
+# Jenkins
 
-This app allows users to create their own learning curriculum. They can then keep track of their progress, share it with friends, and make changes as they go along.
+Follow-along instructions for the freeCodeCamp Jenkins course.
 
-## Table of Contents
+Table of Contents
 
-1. [Running Locally](#running-locally)
-1. [Tech Stack](#tech-stack)
-1. [Mockups](#mockups)
-1. [Design](#design)
-1. [Routes](#routes)
-1. [Schema](#schema)
-1. [API](#api)
-1. [MVP Features](#mvp-features)
-1. [Version 1 Features](#version-1-features)
+- [Technologies Used in Tutorial](#technologies)
+- [Follow Along Material and Extra Information for Sections of the Course](#sections)
+- [Extra Material](#extra-material)
+- [Helpful Jenkins Resources](#helpful-jenkins-resources)
+- [Related Projects](#related-projects)
 
-## Running Locally
+## Overview
 
-### Run the Front-End
+This is a tutorial showing how to build a CI/CD pipeline for a web application using Jenkins. I use one of my previous tutorial apps - [the Curriculum App](https://github.com/faraday-academy/curriculum-app) - from my livestreams to create this. One interesting thing about that app is that I already [have Github actions written to deploy it automatically to Dockerhub](https://github.com/faraday-academy/curriculum-app/tree/dev/.github/workflows) in the repo. That will give you an opportunity to compare the Jenkins pipeline I set up in this tutorial to an already working CI/CD pipeline in the repo.
 
-1. Clone this repo
-1. `cd curr-front-end`
-1. `npm i`
-1. `npm run serve`
+## Technologies
 
-### Run the Back-End
+- Debian servers running on Linode (Jenkins from Linode marketplace)
+- Jenkins
+- Docker & Dockerhub
+- Github
+- Some command line for settings things up
 
-1. Open another terminal tab or window
-1. `cd curr-back-end`
-1. `npm run setup`
-1. `npm start`
+## Sections
 
-## Tech Stack
+*Every section here corresponds to a section in the freeCodeCamp video.*
 
-1. Vue.js/Vue Router/Vuex
-1. Vuetify
-1. Node.js/Express.js
-1. MongoDB/Mongoose
-1. Digital Ocean (hosting)
+### What is Jenkins?
 
-## Mockups
+Why would want you use Jenkins as an app developer?
 
-<p align="center">
-  <img src="mockups/home_page.png" alt="Home Page Mockup">
-</p>
+- [Jenkins use cases](https://www.jenkins.io/solutions/)
 
-<p align="center">
-  <img src="mockups/user_dashboard.png" alt="User Dashboard Mockup">
-</p>
+Why do companies use Jenkins?
 
-<p align="center">
-  <img src="mockups/create_update_curriculum.png" alt="Create or Update Page Mockup">
-</p>
+- [Jenkins users' YouTube playlist](https://www.youtube.com/playlist?list=PLN7ajX_VdyaNG5D3ERmAofba4-Fmqpe2i)
 
-<p align="center">
-  <img src="mockups/display_curriculum.png" alt="Display Curriculum Page Mockup">
-</p>
+How does Jenkins compare to other CI/CD tools?
 
-## Design
+- [CI/CD Tools Comparison: Jenkins, GitLab CI, Buildbot, Drone, and Concourse](https://www.digitalocean.com/community/tutorials/ci-cd-tools-comparison-jenkins-gitlab-ci-buildbot-drone-and-concourse)
+- [Comparing GitHub Actions vs Jenkins](https://acloudguru.com/blog/engineering/comparing-github-actions-vs-jenkins-ci-showdown)
+- [Jenkins versus Gitlab](https://about.gitlab.com/devops-tools/jenkins-vs-gitlab/)
+- [Aleternatives to Jenkins](https://alternativeto.net/software/jenkins/)
 
-Color Palette:
-<img src="mockups/color_palette.png" alt="color palete for application">
-710627 - EA5455 - FAA275 - F5E4C3 - 34A7B2
+### Terms & Definitions
 
-## Routes
+- [Jenkins official glossary of terms](https://www.jenkins.io/doc/book/glossary/)
 
-* / --> Home Page/Landing Page
-* curricula --> shows all curricula
-* curricula/create --> shows form to create
-* curricula/id --> shows single curriculum
-* curricula/id/update --> update single curriculum
+### Project Architecture
 
-## Schema
+![jenkins_architecture_balsamiq_diagram2](https://user-images.githubusercontent.com/10039233/190653544-48ea7cb1-bde8-4bf6-97b8-c1ff5bf854d2.png)
 
-**Curriculum**
+### Setting Up Linode
 
-* id: UUID (pk)
-* name: string
-* goal: string
-* description: string
-* sections: [object]
-    * name: string
-    * resources: [object]
-        * isCompleted: boolean (default: false)
-        * name: string
-        * url: string
-    * projects:  [object]
-        * isCompleted: boolean (default: false)
-        * name: string
-        * url: string
-* createdBy: Mongo object id (userId, foreign key)
-* createdAt: timestamp
-* updatedAt: timestamp
+- [Signing up for Linode ($100 credit)](https://www.linode.com/students)
+- [Jenkins in the Linode marketplace](https://www.linode.com/marketplace/apps/linode/jenkins/)
 
-**User**
+- Configuring Jenkins - admin account, plugins, settings
+- Deploying an app to Github and using the Jenkins Github plugin  
+- Using Jenkins to test and deploy to Dockerhub
+- Another Linode server will be watching for updates on Dockerhub and pull & run the updated container  
+- Reviewing Jenkins features like build history
 
-* username: String
-* email: String
-* password: String (hashed password)
-* isVerified: Boolean
-* createdAt: timestamp
-* updatedAt: timestamp
+### Setting Up Jenkins
 
-**Verification**
+**Make sure you follow these steps to set up Jenkins from the Linode marketplace**: https://www.linode.com/marketplace/apps/linode/jenkins/
 
-*This is just to store and expire verification codes that are sent to user by email.*
+- [Jenkins Handbook and Guides](https://www.jenkins.io/doc/book/)]
 
-* userId: Mongo object id (userId, foreign key)
-* code: Number
+### Jenkins Plugins
 
-## API
+- [Jenkins Plugin Index](https://plugins.jenkins.io/) - Search for plugins
 
-**Prefix:** `/api/v1`
+### Blue Ocean UI
 
-**Endpoints:**
+- [Blue Ocean Docs & Getting Started Guide](https://www.jenkins.io/doc/book/blueocean/)
 
-`/curricula`
+### Jenkins Pipelines
 
-* get
-* post
+Shell scripts from the tutorial:
 
-`/curricula/:id`
+```shell
+ls -la
 
-* get
-* patch
-* delete
+cd curriculum-front && npm i && npm run test:unit
 
-`/count`
+docker build -f curriculum-front/Dockerfile . -t fuze365/curriculum-front
 
-*get the ratio of completed tasks for each curriculum*
+docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASSWORD
 
-* get
+docker push fuze365/curriculum-front:latest
+```
 
-## MVP Features
+- [Getting started with Pipelines](https://www.jenkins.io/doc/book/pipeline/getting-started/)
+- [In-Depth Pipeline Syntax](https://www.jenkins.io/doc/book/pipeline/syntax/)
+- [Freestyle versus Pipeline Projects (old UI)](https://www.youtube.com/watch?v=IOUm1lw7F58)
 
-1. Home Page with list of curriculums
-1. Form Page to create/update a curriculum
-1. User can delete a curriculum
+### SSH'ing into Linode Servers (installing Git)
 
-## Version 1 Features
+Commands for installing Git and Node on server:
 
-1. Users can log in and save their curricula
-1. Users can fork other users curricula
+```shell
+# install Git
+apt install git
+git --version
+
+# node version 16 (comes with npm)
+curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+apt-get install -y nodejs
+node --version
+npm --version
+```
+
+- [Using the Lish Console](https://www.linode.com/docs/guides/using-the-lish-console/)
+- [Official video on how to SSH into Linode server](https://www.youtube.com/watch?v=ZVMckBHd7WA)
+- [SSH into Linode server articles](https://www.linode.com/docs/guides/networking/ssh/)
+
+- [How to install Git on Linux](https://www.linode.com/docs/guides/how-to-install-git-on-linux-mac-and-windows/)
+- [How to install Node with npm on Linux](https://www.linode.com/docs/guides/install-and-use-npm-on-linux/)
+
+### Jenkinsfile
+
+- [Using a Jenkinsfile](https://www.jenkins.io/doc/book/pipeline/jenkinsfile/)
+- [Deep Dive into a Jenkinsfile video](https://www.youtube.com/watch?v=7KCS70sCoK0&list=PLy7NrYWoggjw_LIiDK1LXdNN82uYuuuiC&index=6)
+
+### Docker & Dockerhub
+
+- [Sign up for an account on Dockerhub](https://hub.docker.com/)
+
+## Extra Material
+
+There are two main ways to handle app deployments with our Jenkins setup:
+
+1. We could deploy the app to Dockerhub and have the app server watch for changes to the docker image. It will pull whenever there are changes. (this is what we have set up now)
+2. The more advanced setup is to have Jenkins deploy directly to our app server when all of the CI steps pass. This requires a bit of extra configuration in Jenkins and also ensuring security in the app server.
+
+You can [see this tutorial](https://www.youtube.com/watch?v=hf8wUUrGCgU) for a walkthrough of how I set up the app server to watch for changes to a Docker image on Dockerhub.
+
+## Helpful Jenkins Resources
+
+- [Linode YouTube channel](https://www.youtube.com/c/linode)
+- [Official Jenkins YouTube channel](https://www.youtube.com/c/jenkinscicd/playlists)
+- [TechWorld with Nana YouTube channel](https://www.youtube.com/c/TechWorldwithNana/search?query=jenkins)
+- [Cloudbees YouTube channel](https://www.youtube.com/c/CloudBeesTV/search?query=jenkins)
+
+## Related Projects
+
+- [Jenkins X](https://jenkins-x.io/)
